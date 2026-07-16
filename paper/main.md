@@ -168,15 +168,15 @@ On CWRU, the shallowest layer (conv1) yields a PCS of 3.47%, slightly higher tha
 
 Representative STFT magnitude spectrograms for each of the three bearing conditions are shown below. The cyan dashed lines mark the fault characteristic frequency band boundaries. Spectral energy concentrates at low frequencies for all conditions, with fault classes exhibiting additional harmonic structure.
 
+\newpage
+
 ![Representative STFT spectrograms for Normal, Inner Race, and Outer Race classes](figures/fig1_stft_examples.png){width=95%}
 
 ### 5.7 Physical Consistency × Accuracy Matrix
 
-The Physical Consistency × Accuracy matrix maps each dataset-model pair into a two-dimensional interpretability-performance space. On both datasets, the model occupies the "Speculative" quadrant: high accuracy (>99%) paired with low PCS (<2%).
+The Physical Consistency × Accuracy matrix maps each dataset-model pair into a two-dimensional interpretability-performance space. On both CWRU and MFPT, the model occupies the "Speculative" quadrant: high accuracy (>99%) paired with low PCS (<2%). Since both datasets fall in the same quadrant, Figure 10 shows the representative CWRU result, with MFPT producing a qualitatively identical pattern.
 
-![Physical consistency × accuracy matrix on CWRU](figures/cwru_pcs_acc_matrix.png){width=70%}
-
-![Physical consistency × accuracy matrix on MFPT](figures/mfpt_pcs_acc_matrix.png){width=70%}
+![Physical consistency × accuracy matrix on CWRU](figures/cwru_pcs_acc_matrix.png){width=65%}
 
 Per the deployment decision matrix framework discussed in the interpretable fault diagnosis literature [4], models in the speculative quadrant achieve correct answers through features whose relationship to bearing physics has not been verified. Such models warrant caution in deployment contexts where physical interpretability is required for safety-critical or maintenance decisions.
 
