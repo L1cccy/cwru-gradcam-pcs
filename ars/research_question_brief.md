@@ -1,8 +1,13 @@
-# 研究问题简述 — 方向五：Grad-CAM 物理一致性量化
+# 研究问题简述 v2 — 方向五：Grad-CAM 物理一致性量化（双数据集）
 
 ## 1. 研究问题（一句话）
 
-在 STFT + 2D-CNN 正确分类的 CWRU 轴承故障样本中，Grad-CAM 显著性在多大比例上落在理论故障特征频率（BPFO/BPFI/BSF）的参考频带内？这种物理一致性在跨随机种子、跨相邻窗口和跨噪声条件下是否稳定？
+在 STFT + 2D-CNN 正确分类的 CWRU 和 MFPT 轴承故障样本中，Grad-CAM 显著性在多大比例上落在理论故障特征频率（BPFO/BPFI/BSF）的参考频带内？这种物理一致性在跨随机种子、跨噪声水平、跨数据集（CWRU→MFPT）和跨工况条件下是否稳定？
+
+## 数据集
+
+- **CWRU**: 12kHz DE, 3类（Normal/InnerRace/OuterRace）, 32 recording, ~7552段
+- **MFPT**: 统一降采样至12kHz, 3类, 20 recording, ~14533段
 
 ## 2. 子问题
 
