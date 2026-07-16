@@ -1,14 +1,30 @@
-# Claim-Evidence Table
+# 声明—证据表 — 方向五：Grad-CAM 物理一致性量化
 
-| # | Claim | Evidence | Artifact | Strength | Risk | Revision Needed |
-|---|-------|----------|----------|----------|------|-----------------|
-| 1 | 2D-CNN achieves the highest unpruned accuracy on CWRU (95.6%) among all tested architectures | Mean test accuracy across 3 seeds: 2D-CNN=95.6%, 1D-CNN=90.8%, FC=63.6% | `results/cwru_cnn2d_s*.json`, Table 1 | Strong | One dataset only; 12kHz DE only | State scope clearly |
-| 2 | 1D-CNN achieves near-perfect accuracy on MFPT (99.9%), significantly outperforming 2D-CNN (89.8%) | Mean test accuracy across 3 seeds | `results/mfpt_cnn1d_s*.json`, Table 1 | Strong | MFPT may be an easier dataset (fewer classes, simpler signals) | Acknowledge dataset difficulty confound |
-| 3 | All architectures show accuracy degradation as pruning ratio increases | Accuracy drop from 0% to 90% pruning: FC -13pp, 1D-CNN -36pp, 2D-CNN -37pp (CWRU) | Fig 1 (accuracy-vs-sparsity curves) | Strong | Monotonic trend expected; no surprise | — |
-| 4 | FC is most pruning-robust in terms of absolute accuracy drop (only -13pp on CWRU at 90%) | FC: 63.6%→50.3%; 1D-CNN: 90.8%→55.1%; 2D-CNN: 95.6%→59.1% | Fig 1, Table 1 | Moderate | FC starts low; floor effect (can't drop below random=25%) | Rephrase: "least relative degradation due to low baseline" |
-| 5 | 1D-CNN is most pruning-robust in relative terms, maintaining 81.5% accuracy at 75% pruning on CWRU | 1D-CNN at 75%: 70.6%; 2D-CNN at 75%: 68.4%; difference is within std dev | Fig 1, error bars | Weak | Difference is not statistically significant across 3 seeds | Collect more seeds or soften claim |
-| 6 | Pruning by L1-norm correctly removes low-magnitude channels (not random) | L1-removed channels have consistently lower mean norm than random-removed channels across all models and ratios | `fig_mechanism_norm_distribution.png`, Mechanism Validation table | Strong | Verified analytically; holds for all tested configurations | — |
-| 7 | Structured pruning (zero-masking) does NOT yield proportional inference speedup on CPU | FC latency varies 228-306us (not proportional to 90% sparsity); 1D-CNN latency varies 607-692us | `fig_efficiency_latency.png`, Latency table | Strong | CPU only; GPU/edge hardware may differ | State "CPU with PyTorch dense GEMM" |
-| 8 | Pruning damages model structure: training from scratch at reduced width outperforms prune-then-fine-tune by up to 32pp | CNN1D on CWRU at 75%: prune+ft=65.68%, scratch=97.73% | `ablation_results.json`, Table 2 | Strong | Ablation uses fewer epochs (30 vs 50) | Repeat with matched epochs |
-| 9 | The hypothesis that 2D-CNN is more pruning-robust is NOT supported | 2D-CNN accuracy drop at 75%: -27.2pp; 1D-CNN: -20.2pp (CWRU) | Fig 1, Fig 3 | Strong (negative result) | One dataset shows opposite trend | State as falsified hypothesis |
-| 10 | Adding Gaussian noise at SNR=10dB causes significant accuracy loss (20-50pp) for CNN models | CWRU: CNN1D 90.8%→64.7% (clean→10dB); CNN2D 95.6%→42.2% | Fig 2, noise evaluation data | Strong | Noise is i.i.d. Gaussian, not real-world noise | Acknowledge artificial noise |
+| # | 声明 (Claim) | 证据 (Evidence) | 证据文件 | 强度 | 风险 | 需修改 |
+|---|-------------|----------------|---------|------|------|--------|
+| C1 | STFT+2D-CNN在CWRU上达到极高准确率（3类） | 5种子均值99.86%，标准差<0.1% | results/experiment_results_v2.json cwru.accuracies | 强 | 3类任务太简单（含Normal） | 标注3类局限性 |
+| C2 | STFT+2D-CNN在MFPT上达到100%准确率 | 5种子均100% | results/experiment_results_v2.json mfpt.accuracies | 强 | MFPT数据量小（1800段），文件少 | 标注样本量局限 |
+| C3 | CWRU模型的Grad-CAM显著性未能集中在理论故障频带内 | PCS=1.76%，与平移频带的PCS（1.69%）无显著差异（p=0.52, d=0.05） | Figure cwru_pcs_box.png, cwru_pcs_acc_matrix.png | 强 | 频带定义依赖转速精确性 | 标注带宽敏感性局限 |
+| C4 | MFPT模型的Grad-CAM对故障频率同样无显著关注 | PCS=1.21%，与平移频带（1.29%）无显著差异（p=0.11） | Figure mfpt_pcs_box.png | 中 | MFPT测试集仅4条录音，样本量小 | 标注样本量 |
+| C5 | 双数据集均表现为"投机取巧模型"——高准确率+低物理一致性 | CWRU和MFPT的PCS均<2%，但准确率>99% | Figures cwru_pcs_acc_matrix.png, mfpt_pcs_acc_matrix.png | 强 | PCS定义和频带选择可能有替代方案 | 保留对PCS定义的有效性讨论 |
+| C6 | 注入噪声反而提高CWRU上的PCS | SNR=10dB时PCS从1.76%升至3.23% | Figure cwru_noise_curve.png | 中 | 噪声在STFT幅值谱上注入，非时域 | 明确噪声注入方式 |
+| C7 | MFPT模型在噪声下PCS崩溃（5dB→0.03%） | PCS从1.21%降至0.03%（SNR=5dB） | Figure mfpt_noise_curve.png | 中 | 同上 | 同上 |
+| C8 | 跨数据集迁移完全失败 | CWRU训练模型在MFPT上准确率仅4.3%（低于随机33%） | results/experiment_results_v2.json cross_dataset | 强 | 归一化统计量来自CWRU | 已是实验的自然结果 |
+| C9 | 深层Grad-CAM的PCS不优于浅层（CWRU层消融） | conv1 PCS=3.47%、conv2=3.42%、conv3=2.80% | Figure cwru_layer_pcs.png | 中 | 浅层PCS实际上更高 | 这本身是反直觉发现，值得报告 |
+| C10 | MFPT层消融中PCS波动大但总体极低 | conv1=0.55%、conv2=1.46%、conv3=1.01%（标准差大） | Figure mfpt_layer_pcs.png | 弱 | MFPT测试集小，标准差大 | 降级声明强度 |
+
+## 核心声明（论文中可以坚定陈述）
+
+1. **两数据集均表现为"高准确率+低物理一致性"**（C1-C5, 强证据）
+2. **跨数据集迁移完全失败**（C8, 强证据）——这是 CWRU 固有局限的实证
+3. **噪声对PCS的影响不一致**（C6-C7, 中等证据）
+
+## 过度声明（需要弱化措辞）
+
+- "模型不使用故障频率信息" → 应改为 "在本实验的PCS定义和频带设置下，未观察到Grad-CAM显著性集中在理论故障频带的证据"
+- "Grad-CAM无效" → 应改为 "标准Grad-CAM在本设置下未能提供物理一致的解释"
+
+## 未支持声明（不应出现在论文中）
+
+- "模型使用了投机取巧的特征" → 我们确实知道PCS很低，但不知道模型具体用了什么特征
+- "其他故障诊断模型也有此问题" → 本实验仅测试了一种2D-CNN架构
