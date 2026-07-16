@@ -110,9 +110,11 @@ Five random seeds (42, 123, 256, 789, 1024) are used for all experiments. Classi
 
 Classification accuracy is near-ceiling on both datasets. On CWRU, the 2D-CNN achieves 99.86% mean accuracy across 5 seeds (σ < 0.1%), with all three classes correctly identified at high recall. On MFPT, accuracy reaches 100% across all 5 seeds. These results are consistent with prior work [1, 4] and confirm that the trained models are competent classifiers.
 
-**Figure 1**: [cwru_confusion.png] Confusion matrices for three representative CWRU seeds.
+**Figure 1**: Confusion matrices for three representative CWRU seeds.
+![Confusion matrices - CWRU](../results/figures/cwru_confusion.png)
 
-**Figure 2**: [mfpt_confusion.png] Confusion matrices for three representative MFPT seeds.
+**Figure 2**: Confusion matrices for three representative MFPT seeds.
+![Confusion matrices - MFPT](../results/figures/mfpt_confusion.png)
 
 ### 5.2 Physical Consistency Score
 
@@ -127,9 +129,11 @@ Despite near-perfect classification, Grad-CAM attention shows no significant con
 
 On both datasets, PCS is approximately 1-2%, substantially below the random expectation of 4.1%. The negative control shows no significant difference between true and shifted frequency bands, with negligible effect sizes. This means that Grad-CAM saliency does not preferentially fall within the frequency regions where bearing physics predicts fault signatures.
 
-**Figure 3**: [cwru_pcs_box.png] Box plot of PCS for true vs. shifted frequency bands on CWRU.
+**Figure 3**: Box plot of PCS for true vs. shifted frequency bands on CWRU.
+![PCS box plot - CWRU](../results/figures/cwru_pcs_box.png)
 
-**Figure 4**: [mfpt_pcs_box.png] Box plot of PCS for true vs. shifted frequency bands on MFPT.
+**Figure 4**: Box plot of PCS for true vs. shifted frequency bands on MFPT.
+![PCS box plot - MFPT](../results/figures/mfpt_pcs_box.png)
 
 ### 5.3 Noise Robustness
 
@@ -145,9 +149,11 @@ Noise injection produces unexpected and dataset-dependent effects on PCS (Table 
 
 On CWRU, moderate noise (10 dB) increases PCS from 1.76% to 3.23%, a counterintuitive result that brings PCS closer to, though still below, the random baseline. On MFPT, noise collapses PCS to near zero, indicating that the model's attention patterns on MFPT are brittle under perturbation.
 
-**Figure 5**: [cwru_noise_curve.png] PCS as a function of SNR on CWRU.
+**Figure 5**: PCS as a function of SNR on CWRU.
+![Noise curve - CWRU](../results/figures/cwru_noise_curve.png)
 
-**Figure 6**: [mfpt_noise_curve.png] PCS as a function of SNR on MFPT.
+**Figure 6**: PCS as a function of SNR on MFPT.
+![Noise curve - MFPT](../results/figures/mfpt_noise_curve.png)
 
 ### 5.4 Cross-Dataset Generalization
 
@@ -164,19 +170,24 @@ Layer-wise Grad-CAM analysis shows that PCS does not systematically improve with
 | CWRU | 0.0347 ± 0.0008 | 0.0342 ± 0.0010 | 0.0280 ± 0.0020 | 0.0339 ± 0.0019 |
 | MFPT | 0.0055 ± 0.0105 | 0.0146 ± 0.0113 | 0.0101 ± 0.0055 | — |
 
-**Figure 7**: [cwru_layer_pcs.png] Layer-wise PCS comparison on CWRU.
+**Figure 7**: Layer-wise PCS comparison on CWRU.
+![Layer PCS - CWRU](../results/figures/cwru_layer_pcs.png)
 
-**Figure 8**: [mfpt_layer_pcs.png] Layer-wise PCS comparison on MFPT.
+**Figure 8**: Layer-wise PCS comparison on MFPT.
+![Layer PCS - MFPT](../results/figures/mfpt_layer_pcs.png)
 
 ### 5.6 Per-Class STFT Spectrograms
 
-**Figure 9**: [fig1_stft_examples.png] Representative STFT spectrograms for Normal, Inner Race, and Outer Race classes from CWRU, with fault frequency band boundaries marked.
+**Figure 9**: Representative STFT spectrograms for Normal, Inner Race, and Outer Race classes from CWRU, with fault frequency band boundaries marked.
+![STFT examples](../results/figures/fig1_stft_examples.png)
 
 ### 5.7 Physical Consistency × Accuracy Matrix
 
-**Figure 10**: [cwru_pcs_acc_matrix.png] Physical consistency × accuracy 2x2 matrix on CWRU.
+**Figure 10**: Physical consistency × accuracy 2x2 matrix on CWRU.
+![PCS×Acc matrix - CWRU](../results/figures/cwru_pcs_acc_matrix.png)
 
-**Figure 11**: [mfpt_pcs_acc_matrix.png] Physical consistency × accuracy 2x2 matrix on MFPT.
+**Figure 11**: Physical consistency × accuracy 2x2 matrix on MFPT.
+![PCS×Acc matrix - MFPT](../results/figures/mfpt_pcs_acc_matrix.png)
 
 On both datasets, the model falls into the "Speculative" quadrant: high accuracy (>99%) paired with low PCS (<2%). Per the framework proposed in the deployment decision matrix [15], such models warrant caution: they achieve correct answers potentially through features unrelated to bearing physics.
 
