@@ -119,6 +119,8 @@ On CWRU, PCS on true bands (1.76%) is slightly higher than on shifted bands (1.6
 
 The negligible effect sizes (|d| < 0.15) indicate that the saliency distribution, as captured by the frequency-collapsed PCS, does not discriminate genuine fault-characteristic frequency regions from randomly positioned bands of identical aggregate width.
 
+\newpage
+
 ![Box plot of PCS for true versus shifted frequency bands on CWRU](figures/cwru_pcs_box.png){width=85%}
 
 ![Box plot of PCS for true versus shifted frequency bands on MFPT](figures/mfpt_pcs_box.png){width=85%}
@@ -174,15 +176,9 @@ Representative STFT magnitude spectrograms for each of the three bearing conditi
 
 ![Representative STFT spectrograms for Normal, Inner Race, and Outer Race classes](figures/fig1_stft_examples.png){width=95%}
 
-\newpage
-
 ### 5.7 Physical Consistency × Accuracy Matrix
 
-The Physical Consistency × Accuracy matrix maps each dataset-model pair into a two-dimensional interpretability-performance space. Figure 10 shows both CWRU and MFPT occupying the "Speculative" quadrant: near-ceiling accuracy paired with PCS values below 2%.
-
-![Physical consistency × accuracy matrix — CWRU and MFPT combined](figures/combined_pcs_acc_matrix.png){width=85%}
-
-Per the deployment decision matrix framework discussed in the interpretable fault diagnosis literature [4], models in the speculative quadrant achieve correct answers through features whose relationship to bearing physics has not been verified. Such models warrant caution in deployment contexts where physical interpretability is required for safety-critical or maintenance decisions.
+The Physical Consistency × Accuracy matrix maps each dataset-model pair into a two-dimensional interpretability-performance space. Both CWRU and MFPT occupy the "Speculative" quadrant: near-ceiling accuracy (CWRU: 99.86%, MFPT: 100%) paired with PCS values below 2% (CWRU: 1.76%, MFPT: 1.21%). Per the deployment decision matrix framework discussed in the interpretable fault diagnosis literature [4], models in this quadrant achieve correct answers through features whose relationship to bearing physics has not been verified. Such models warrant caution in deployment contexts where physical interpretability is required for safety-critical or maintenance decisions.
 
 ---
 
