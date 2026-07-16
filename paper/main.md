@@ -6,8 +6,6 @@ Gradient-weighted Class Activation Mapping (Grad-CAM) is routinely presented as 
 
 **Keywords**: Grad-CAM, physical consistency, bearing fault diagnosis, negative control, explainable AI, CWRU, MFPT
 
----
-
 ## 1. Introduction
 
 Convolutional neural networks (CNNs) operating on time-frequency representations of vibration signals routinely achieve classification accuracy exceeding 99% on benchmark bearing fault datasets such as the Case Western Reserve University (CWRU) bearing data [1], [2]. As accuracy has plateaued, the research community has shifted attention to interpretability. Gradient-weighted Class Activation Mapping (Grad-CAM) [3] has become the dominant post-hoc explanation tool for CNNs in fault diagnosis, adopted in the majority of interpretability studies surveyed in rotating machinery [4].
@@ -21,8 +19,6 @@ This paper proposes a measurement framework to address this gap. The Physical Co
 The framework is evaluated on two public bearing datasets (CWRU and MFPT [11]) using STFT-trained 2D-CNN classifiers across five random seeds. The study asks two questions: (1) For correctly classified bearing fault samples, does Grad-CAM saliency preferentially concentrate within theoretical fault characteristic frequency bands? (2) Is this concentration stable across random seeds, noise-degraded inputs, and datasets?
 
 The negative control methodology is standard in biomedical and psychological research but rare in machine learning interpretability studies. Within the bearing fault diagnosis literature, no prior work has applied a frequency-shifted negative control to evaluate Grad-CAM physical consistency. The principal contribution of this paper is the demonstration that a measurement framework as simple as PCS with a negative control can reveal a substantive gap between the qualitative interpretability claims frequently reported and the quantitative evidence available to support them.
-
----
 
 ## 2. Related Work
 
@@ -43,8 +39,6 @@ Negative controls have been employed in biomedical machine learning interpretabi
 ### 2.3 CWRU Dataset Limitations
 
 The CWRU bearing dataset, despite being the most widely used benchmark in bearing fault diagnosis [1], has known limitations that interact with interpretability claims. Hendriks et al. [9] analyzed the CWRU dataset for benchmarking purposes and emphasized the importance of controlled data-splitting strategies to prevent inflated accuracy reports. Rosa et al. [21] addressed data leakage concerns through a multi-label benchmarking approach. The dataset contains artificially seeded faults produced by electric discharge machining, which may differ from naturally occurring bearing degradation in industrial environments [9]. The limited number of operating conditions (four motor loads, one sensor position for DE data) raises questions about whether high reported accuracy reflects genuine fault feature learning or overfitting to dataset-specific characteristics. These concerns are directly relevant to Grad-CAM interpretation: if a model achieves high accuracy through dataset-specific shortcuts, its Grad-CAM heatmaps may misleadingly appear to highlight fault-relevant regions.
-
----
 
 ## 3. Methodology
 
@@ -74,8 +68,6 @@ The frequency-shifted control shares structural properties with the true measure
 
 The classifier is a 2D-CNN with three convolutional blocks followed by a fully connected classification head: Conv2D(1→16, k=3) → BatchNorm → ReLU → MaxPool2d(2); Conv2D(16→32, k=3) → BatchNorm → ReLU → MaxPool2d(2); Conv2D(32→64, k=3) → BatchNorm → ReLU → AdaptiveAvgPool2d(1); Flatten → Linear(64→128) → ReLU → Dropout(p=0.5) → Linear(128→3). This architecture follows the standard pattern from prior bearing fault diagnosis literature [5], [6]. Training uses the Adam optimizer (learning rate 0.001), cross-entropy loss, batch size 32, maximum 50 epochs, and early stopping with patience of 10 epochs on validation loss. Five random seeds (42, 123, 256, 789, 1024) are used for all experiments.
 
----
-
 ## 4. Experimental Setup
 
 ### 4.1 Datasets and Preprocessing
@@ -83,6 +75,10 @@ The classifier is a 2D-CNN with three convolutional blocks followed by a fully c
 Two public bearing vibration datasets are used. The CWRU dataset [22] provides drive-end accelerometer signals at 12 kHz sampling rate. Three classes are selected: Normal (4 baseline recordings at 48 kHz, downsampled to 12 kHz), Inner Race fault (16 recordings), and Outer Race fault centered position (12 recordings). The Ball fault class is excluded because the MFPT dataset does not contain ball fault data, preventing cross-dataset class alignment. Signals are segmented into fixed windows of 1,024 samples (approximately 85 ms) with a hop length of 512 samples (50% overlap). An STFT is computed with n_fft = 512 (frequency resolution 23.44 Hz) and Hann window, yielding magnitude spectrograms of size 257 frequency bins by approximately 5 time frames. The dataset yields 5,884 segments from 32 recordings.
 
 The MFPT dataset [11] provides bearing vibration data at native sampling rates of 48,828 Hz and 97,656 Hz. All signals are resampled to 12 kHz to match CWRU. Three classes are used: Normal (3 baseline recordings), Inner Race fault (7 variable-load recordings, 0–300 lbs), and Outer Race fault (3 constant-load plus 7 variable-load recordings, 25–300 lbs). The same windowing and STFT parameters are applied, yielding 1,800 segments from 20 recordings.
+
+Representative STFT magnitude spectrograms for each of the three bearing conditions are shown in Figure 1. The cyan dashed lines mark the fault characteristic frequency band boundaries. Spectral energy concentrates at low frequencies for all conditions, with fault classes exhibiting additional harmonic structure.
+
+![Representative STFT spectrograms for Normal, Inner Race, and Outer Race classes](figures/fig1_stft_examples.png){width=95%}
 
 ### 4.2 Leakage Control
 
@@ -92,13 +88,11 @@ A recording-level split is applied for both datasets: all windows derived from t
 
 Classification is evaluated via accuracy, per-class recall, and confusion matrices across five random seeds. PCS is computed on a random subset of up to 300 test samples per dataset using the best-performing model (by validation loss) for each seed. Noise robustness is tested by adding zero-mean Gaussian noise to the normalized STFT magnitude at SNR levels of 10 dB and 5 dB, modeling spectrogram degradation rather than time-domain sensor noise. Cross-dataset generalization is assessed by training on CWRU and evaluating on MFPT without fine-tuning. Layer-wise ablation compares Grad-CAM computed at conv1, conv2, and conv3 layers.
 
----
-
 ## 5. Results
 
 ### 5.1 Classification Performance
 
-Classification accuracy reaches ceiling on both datasets. On CWRU, the 2D-CNN achieves 99.86% mean accuracy across five seeds (σ < 0.1%). On MFPT, the model achieves 100.00% accuracy across all five seeds. These results are consistent with prior literature and confirm that the trained models are competent classifiers capable of near-perfect bearing fault discrimination.
+Classification accuracy reaches ceiling on both datasets. On CWRU, the 2D-CNN achieves 99.86% mean accuracy across five seeds (σ < 0.1%). On MFPT, the model achieves 100.00% accuracy across all five seeds. These results are consistent with prior literature and confirm that the trained models are competent classifiers capable of near-perfect bearing fault discrimination (Figures 2 and 3).
 
 ![Confusion matrices for three representative CWRU seeds](figures/cwru_confusion.png){width=85%}
 
@@ -106,7 +100,7 @@ Classification accuracy reaches ceiling on both datasets. On CWRU, the 2D-CNN ac
 
 ### 5.2 Physical Consistency Score and Negative Control
 
-Despite near-perfect classification, Grad-CAM saliency shows no significant concentration in theoretical fault frequency bands on either dataset (Table 1).
+Despite near-perfect classification, Grad-CAM saliency shows no significant concentration in theoretical fault frequency bands on either dataset (Table 1, Figures 4 and 5).
 
 **Table 1: Physical Consistency Score (PCS) Results**
 
@@ -127,7 +121,7 @@ The negligible effect sizes (|d| < 0.15) indicate that the saliency distribution
 
 ### 5.3 Noise Robustness
 
-Noise injection produces unexpected and dataset-divergent effects on PCS (Table 2).
+Noise injection produces unexpected and dataset-divergent effects on PCS (Table 2, Figures 6 and 7).
 
 **Table 2: PCS Under Frequency-Domain Noise Injection**
 
@@ -149,7 +143,7 @@ When a model trained on CWRU is tested on MFPT without fine-tuning, classificati
 
 ### 5.5 Layer-wise Ablation
 
-Grad-CAM computed at different convolutional layers reveals that PCS does not systematically improve with network depth (Table 3).
+Grad-CAM computed at different convolutional layers reveals that PCS does not systematically improve with network depth (Table 3, Figures 8 and 9).
 
 **Table 3: Layer-wise PCS (mean ± standard deviation)**
 
@@ -162,25 +156,13 @@ Grad-CAM computed at different convolutional layers reveals that PCS does not sy
 
 On CWRU, the shallowest layer (conv1) yields a PCS of 3.47%, slightly higher than the deepest layer (conv3: 2.80%). This is opposite to the hypothesis that deeper layers, having larger receptive fields and more abstract feature representations, would exhibit stronger frequency selectivity. On MFPT, all layers produce PCS below 1.5% with large standard deviations, consistent with the finding that MFPT-based models show even weaker physical consistency than CWRU-based models. The Grad-CAM++ variant [23] at conv3 yields PCS of 3.39%, comparable to the shallow conv1 result, suggesting that the weighting scheme may modestly improve frequency-band saliency capture.
 
-\newpage
+![Layer-wise PCS comparison on CWRU](figures/cwru_layer_pcs.png){width=48%}
 
-![Layer-wise PCS comparison on CWRU](figures/cwru_layer_pcs.png){width=85%}
+![Layer-wise PCS comparison on MFPT](figures/mfpt_layer_pcs.png){width=48%}
 
-![Layer-wise PCS comparison on MFPT](figures/mfpt_layer_pcs.png){width=85%}
-
-### 5.6 STFT Spectrograms
-
-Representative STFT magnitude spectrograms for each of the three bearing conditions are shown below. The cyan dashed lines mark the fault characteristic frequency band boundaries. Spectral energy concentrates at low frequencies for all conditions, with fault classes exhibiting additional harmonic structure.
-
-\newpage
-
-![Representative STFT spectrograms for Normal, Inner Race, and Outer Race classes](figures/fig1_stft_examples.png){width=95%}
-
-### 5.7 Physical Consistency × Accuracy Matrix
+### 5.6 Physical Consistency × Accuracy Matrix
 
 The Physical Consistency × Accuracy matrix maps each dataset-model pair into a two-dimensional interpretability-performance space. Both CWRU and MFPT occupy the "Speculative" quadrant: near-ceiling accuracy (CWRU: 99.86%, MFPT: 100%) paired with PCS values below 2% (CWRU: 1.76%, MFPT: 1.21%). Per the deployment decision matrix framework discussed in the interpretable fault diagnosis literature [4], models in this quadrant achieve correct answers through features whose relationship to bearing physics has not been verified. Such models warrant caution in deployment contexts where physical interpretability is required for safety-critical or maintenance decisions.
-
----
 
 ## 6. Discussion
 
@@ -196,13 +178,9 @@ The layer-wise results challenge the expectation that deeper layers extract more
 
 PCS is best understood not as an absolute measure of model interpretability but as a relative comparison tool whose validity depends on the negative control. If true and shifted bands produce indistinguishable PCS, the saliency pattern cannot be attributed to fault-frequency selectivity. However, PCS has not been independently validated against ground-truth interpretability. A model could achieve low PCS while genuinely using fault-frequency information distributed across non-adjacent harmonics that individually fall outside the defined bands. Conversely, a model could achieve high PCS by chance if fault bands are wide enough to capture a substantial fraction of the saliency mass regardless of the model's actual attention pattern. Future work could calibrate PCS against synthetic signals with known, controlled fault-frequency content to establish an upper-bound reference. Within this study's scope, conclusions are restricted to the comparative claim that true and shifted bands produce indistinguishable PCS.
 
----
-
 ## 7. Limitations
 
 Results are conditioned on several measurement and design choices that affect interpretation. First, PCS is sensitive to the choice of frequency band boundaries and the per-band bandwidth. Narrower bands produce lower absolute PCS; wider bands increase both the metric and the random baseline proportionally. The ±2 bin (±46.9 Hz) bandwidth was selected to match the STFT frequency resolution but was not systematically varied in a sensitivity analysis. Second, the 23.44 Hz frequency resolution at n_fft = 512 is coarse relative to the spacing between BPFO (104 Hz) and BPFI (157 Hz), which are separated by only 53 Hz and span approximately two frequency bins. A finer frequency resolution—achievable with larger n_fft at the cost of reduced temporal resolution—could improve the distinguishability of individual fault frequency contributions. Third, Grad-CAM on STFT captures what the model attends to within the spectrogram representation; the results do not exclude the possibility that 1D-CNNs on raw waveforms, or models using envelope spectra, would exhibit different physical consistency patterns. Fourth, only one CNN architecture (three-layer Conv2D) was tested. Architectural variations in kernel size, depth, pooling strategy, and normalization may influence Grad-CAM saliency distributions. Fifth, both CWRU and MFPT are laboratory datasets with artificially induced faults. Findings do not necessarily transfer to naturally occurring bearing degradation or industrial deployment environments. Sixth, the MFPT test split is limited to four recordings, reducing statistical power for MFPT-specific conclusions.
-
----
 
 ## 8. Conclusion
 
@@ -212,8 +190,6 @@ These results do not invalidate Grad-CAM as a research tool, nor do they demonst
 
 Future studies reporting Grad-CAM as interpretability evidence in vibration-based fault diagnosis should consider: (a) including a defined quantitative consistency metric; (b) employing a negative control condition that tests the specificity of the claimed frequency-selective attention; and (c) reporting the metric's sensitivity to measurement parameters such as frequency band definition and STFT resolution. A careful negative result with adequate controls, such as the one reported here, advances the methodology of interpretable fault diagnosis more than an unsupported positive interpretability claim.
 
----
-
 ## Acknowledgments
 
 The CWRU bearing data were provided by the Case Western Reserve University Bearing Data Center. The MFPT data were provided by the Society for Machinery Failure Prevention Technology.
@@ -221,8 +197,6 @@ The CWRU bearing data were provided by the Case Western Reserve University Beari
 ## AI-Use Disclosure
 
 AI assistance was employed for literature search and summarization, generation of experiment code (data loading, model training, Grad-CAM computation, PCS metric, and figure generation), and drafting of this manuscript from an evidence package comprising experiment results, figures, and a claim-evidence table. All numerical results were produced by executed Python code and verified against the raw experiment output file. No citations were fabricated; all cited works were verified through Google Scholar or arXiv. The research question, experimental design decisions (frequency band definitions, PCS formulation, ablation structure, negative control design), and interpretation of results were determined by the author.
-
----
 
 ## References
 
