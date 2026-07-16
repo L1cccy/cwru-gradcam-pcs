@@ -6,21 +6,13 @@ Gradient-weighted Class Activation Mapping (Grad-CAM) is routinely presented as 
 
 **Keywords**: Grad-CAM, physical consistency, bearing fault diagnosis, negative control, explainable AI, CWRU, MFPT
 
-## 摘要（中文）
-
-Grad-CAM 在基于深度学习的轴承故障诊断中被广泛用作模型可解释性的可视化证据。常见的论述是：Grad-CAM 热力图的高亮区域与理论故障特征频率（BPFO、BPFI、BSF）吻合，表明模型学到了物理上有意义的频域特征。然而，此类推断极少经过定量验证，更未引入负对照检验。本文提出物理一致性分数（PCS），定义为 Grad-CAM 显著性在理论故障特征频带内的占比，并设计频带平移负对照（将参考频带随机位移后重新计算PCS），以检验显著性分布是否真正集中于故障频率区域。在CWRU和MFPT两个公开数据集上，使用STFT+2D-CNN分类器（5个随机种子），模型达到接近完美的分类准确率（CWRU: 99.86%；MFPT: 100%），但PCS始终低于2%，且与平移频带的PCS无显著差异（CWRU: d=0.05, p=0.52；MFPT: d=−0.12, p=0.11）。跨数据集泛化准确率仅4.3%。逐层消融显示物理一致性不随网络深度改善。噪声注入对PCS的影响呈数据集依赖性且方向相反。结果表明，定性观察Grad-CAM热力图不足以构成模型理解故障物理机制的证据，建议未来涉及可解释性声明的故障诊断研究至少包含一个定量指标和一个负对照。
-
-**关键词**: Grad-CAM；物理一致性；轴承故障诊断；负对照；可解释人工智能；CWRU；MFPT
-
----
-
 ---
 
 ## 1. Introduction
 
 Convolutional neural networks (CNNs) operating on time-frequency representations of vibration signals routinely achieve classification accuracy exceeding 99% on benchmark bearing fault datasets such as the Case Western Reserve University (CWRU) bearing data [1], [2]. As accuracy has plateaued, the research community has shifted attention to interpretability. Gradient-weighted Class Activation Mapping (Grad-CAM) [3] has become the dominant post-hoc explanation tool for CNNs in fault diagnosis, adopted in the majority of interpretability studies surveyed in rotating machinery [4].
 
-The prevailing argument in the fault diagnosis literature follows a consistent pattern: Grad-CAM is applied to a trained CNN; the resulting heatmap shows elevated activation in frequency regions that visually coincide with known bearing fault characteristic frequencies (ball pass frequency outer race [BPFO], ball pass frequency inner race [BPFI], ball spin frequency [BSF]); the authors conclude that the model has learned physically meaningful frequency features [5]—[8]. This inference from qualitative visual inspection to quantitative physical understanding has gone largely unchallenged.
+The prevailing argument in the fault diagnosis literature follows a consistent pattern: Grad-CAM is applied to a trained CNN; the resulting heatmap shows elevated activation in frequency regions that visually coincide with known bearing fault characteristic frequencies (ball pass frequency outer race [BPFO], ball pass frequency inner race [BPFI], ball spin frequency [BSF]); the authors conclude that the model has learned physically meaningful frequency features [5]-[8]. This inference from qualitative visual inspection to quantitative physical understanding has gone largely unchallenged.
 
 A heatmap hotspot near a fault frequency does not constitute evidence of systematic frequency-selective attention. Without a quantitative metric and a negative control, the observed spatial coincidence between a Grad-CAM activation and a fault frequency band could arise from chance alignment, from the model attending to adjacent but physically irrelevant frequency content, or from a dataset-specific shortcut that happens to correlate with fault-characteristic bands on a small number of test samples. The CWRU dataset is known to suffer from several confounds—recording-level identity leakage [9], limited operating condition diversity [10], and artificially induced rather than naturally occurring faults—that could produce high classification accuracy through spurious features unrelated to bearing physics.
 
@@ -38,7 +30,7 @@ The negative control methodology is standard in biomedical and psychological res
 
 Chen and Lee [5] first applied Grad-CAM to vibration signal STFT spectrograms for bearing fault classification, showing that different fault types produced attention maps highlighting distinct frequency regions. This work established the paradigm of "visualizing what the CNN sees" as a proxy for interpretability. Li et al. [2] proposed Multilayer Grad-CAM (MLG-CAM), which aggregates saliency across multiple convolutional layers, and defined three quantitative indicators—Relative Activation of Target Map (RATM), Relative Activation of Target Area (RATA), and Comprehensive Evaluation Indicator (CEI)—for evaluating Grad-CAM quality. This represents the closest prior work to our quantitative approach, though the indicators focus on spatial localization precision rather than frequency-domain physical consistency.
 
-Several subsequent studies have adopted Grad-CAM in fault diagnosis without adding quantitative evaluation. Lu et al. [6] constructed a health library of Grad-CAM feature maps for CWRU bearings and argued that retrieved prediction basis samples were physically meaningful. Guo et al. [7] proposed a quantitative measure for CNN interpretability in frequency-domain analysis but did not include a negative control. Kim and Kim [8] combined Grad-CAM with statistical metrics for feature selection on vibration spectrograms. Jiang et al. [12] recently proposed a CNN-based method with quantifiable interpretability, defining a metric to measure the alignment between saliency maps and fault characteristic regions.
+Several subsequent studies have adopted Grad-CAM in fault diagnosis without adding quantitative evaluation. Lu et al. [6] constructed a health library of Grad-CAM feature maps for CWRU bearings and argued that retrieved prediction basis samples were physically meaningful. Guo et al. [7] proposed a quantitative measure for CNN interpretability in frequency-domain analysis but did not include a negative control. Kim and Kim [8] combined Grad-CAM with statistical metrics for feature selection on vibration spectrograms. Jiang et al. [12] recently proposed a CNN-based method with quantifiable interpretability, defining a metric to measure the alignment between saliency maps and fault characteristic regions. Liefstingh et al. [24] conducted a systematic analysis of Grad-CAM interpretation in bearing fault diagnosis, finding that qualitative inspection of saliency maps alone could not reliably distinguish between model architectures.
 
 Two review papers confirm the trend. Chen et al. [4] surveyed 120+ papers on interpretable fault diagnosis and noted that most studies present Grad-CAM heatmaps qualitatively, with fewer than 15% including any quantitative interpretation metric. Peng et al. [13] systematically reviewed interpretability research in intelligent fault diagnosis, concluding that "developing interpretable qualitative or quantitative evaluation mechanisms for specific diagnostic tasks remains an open challenge." Mey and Neufeld [14] provided a methodological framework for XAI evaluation in vibration-based fault detection, explicitly recommending the verification of whether highlighted frequency bands correspond to physical fault features—a recommendation this paper operationalizes.
 
@@ -66,9 +58,9 @@ The Physical Consistency Score is defined as the proportion of total saliency en
 
 $$\text{PCS} = \frac{\sum_{f \in B} S(f)}{\sum_{f=0}^{F_{max}} S(f)}$$
 
-where B is the union of frequency bins falling within the reference bands around each bearing fault characteristic frequency. The fault frequencies are computed from bearing geometry parameters and shaft rotational speed. For the SKF 6205-2RS bearing used in the CWRU test rig (pitch diameter 39.04 mm, ball diameter 7.94 mm, 9 balls, contact angle 0°) at approximately 1,750 rpm, the theoretical frequencies are: Outer race fault frequency (BPFO) ≈ 104 Hz at orders 1 through 3; Inner race fault frequency (BPFI) ≈ 157 Hz; Ball spin frequency (BSF) ≈ 137 Hz. The reference bands are defined at ±2 STFT frequency bins (±46.9 Hz at the 23.44 Hz bin width given by 12 kHz sampling and n_fft = 512), yielding bands of B1: 82–129 Hz, B2: 129–188 Hz, B3: 188–234 Hz, B4: 281–328 Hz.
+where B is the union of frequency bins falling within the reference bands around each bearing fault characteristic frequency, and F_max = 6,000 Hz is the Nyquist frequency (half the 12 kHz sampling rate). The fault frequencies are computed from bearing geometry parameters and shaft rotational speed. For the SKF 6205-2RS bearing used in the CWRU test rig (pitch diameter 39.04 mm, ball diameter 7.94 mm, 9 balls, contact angle 0°) at approximately 1,750 rpm, the theoretical frequencies are: Outer race fault frequency (BPFO) ≈ 104 Hz at orders 1 through 3; Inner race fault frequency (BPFI) ≈ 157 Hz; Ball spin frequency (BSF) ≈ 137 Hz. The reference bands are centered on each fault frequency with half-width ±1 STFT frequency bin (±23.4 Hz at the 23.44 Hz bin resolution given by 12 kHz sampling and n_fft = 512), yielding four bands: B1 (BPFO, 82–129 Hz), B2 (BPFI/BSF, 129–188 Hz), B3 (2×BPFO, 188–234 Hz), and B4 (3×BPFO, 281–328 Hz). Note that BPFI and BSF fall within the same band due to the coarse frequency resolution.
 
-PCS ranges from 0 (no saliency in fault bands) to 1 (all saliency concentrated in fault bands). The combined width of the five reference bands is approximately 245 Hz. With the Nyquist frequency at 6,000 Hz (half of the 12 kHz sampling rate), the expected PCS under a uniform saliency distribution is approximately 4.1%. This serves as a non-parametric random baseline for interpreting PCS values.
+PCS ranges from 0 (no saliency in fault bands) to 1 (all saliency concentrated in fault bands). The combined width of these four reference bands is approximately 197 Hz. Across the 6,000 Hz Nyquist range (half of the 12 kHz sampling rate), a uniform saliency distribution would allocate approximately 3.3% of energy to these four bands—a non-parametric random baseline for interpreting PCS values.
 
 ### 3.2 Frequency-Shifted Negative Control
 
@@ -151,7 +143,7 @@ On CWRU, moderate noise increases PCS from 1.76% to 3.23% (10 dB), an 83% relati
 
 ### 5.4 Cross-Dataset Generalization
 
-When a model trained on CWRU is tested on MFPT without fine-tuning, classification accuracy drops to 4.33% (mean across five seeds). This is substantially below the 33.3% random-chance baseline for three-class classification, indicating that the model systematically misclassifies MFPT samples rather than merely failing to generalize. The result confirms the existence of a substantial domain gap between laboratory bearing datasets and provides empirical support for the conjecture that the CWRU-trained model exploits dataset-specific features rather than physics-general bearing fault signatures.
+When a model trained on CWRU is tested on MFPT without fine-tuning, classification accuracy drops to 4.3% (mean across five seeds). This is substantially below the 33.3% random-chance baseline for three-class classification, indicating that the model systematically misclassifies MFPT samples rather than merely failing to generalize. The result confirms the existence of a substantial domain gap between laboratory bearing datasets and provides empirical support for the conjecture that the CWRU-trained model exploits dataset-specific features rather than physics-general bearing fault signatures.
 
 ### 5.5 Layer-wise Ablation
 
@@ -173,6 +165,8 @@ On CWRU, the shallowest layer (conv1) yields a PCS of 3.47%, slightly higher tha
 ![Layer-wise PCS comparison on MFPT](figures/mfpt_layer_pcs.png){width=85%}
 
 ### 5.6 STFT Spectrograms
+
+Representative STFT magnitude spectrograms for each of the three bearing conditions are shown below. The cyan dashed lines mark the fault characteristic frequency band boundaries. Spectral energy concentrates at low frequencies for all conditions, with fault classes exhibiting additional harmonic structure.
 
 ![Representative STFT spectrograms for Normal, Inner Race, and Outer Race classes](figures/fig1_stft_examples.png){width=95%}
 
@@ -242,7 +236,7 @@ AI assistance was employed for literature search and summarization, generation o
 
 [5] H. Y. Chen and C. H. Lee, "Vibration signals analysis by explainable artificial intelligence (XAI) approach: Application on bearing faults diagnosis," *IEEE Access*, vol. 8, pp. 134246–134256, 2020.
 
-[6] H. Lu, A. M. Bray, C. Hu, A. T. Zimmerman, and H. Xu, "An interpretable deep learning method for bearing fault diagnosis," arXiv:2308.10292, 2023.
+[6] H. Lu, A. M. Bray, C. Hu, A. T. Zimmerman, and H. Xu, "An interpretable deep learning method for bearing fault diagnosis," arXiv preprint arXiv:2308.10292, 2023.
 
 [7] L. Guo, X. Gu, Y. Yu, A. Duan, and H. Gao, "An analysis method for interpretability of convolutional neural network in bearing fault diagnosis," *IEEE Trans. Instrum. Meas.*, vol. 73, 2023.
 
@@ -250,7 +244,7 @@ AI assistance was employed for literature search and summarization, generation o
 
 [9] J. Hendriks, P. Dumond, and D. A. Knox, "Towards better benchmarking using the CWRU bearing fault dataset," *Mech. Syst. Signal Process.*, vol. 169, p. 108732, 2022.
 
-[10] Student Manual, "Prompt-Driven Academic Research Experiment: From CWRU Bearing Data To A Working Paper," Section 1.10, 2026.
+[10] "Prompt-Driven Academic Research Experiment: From CWRU Bearing Data to a Working Paper," Course Manual, Section 1.10, 2026.
 
 [11] Society for Machinery Failure Prevention Technology, "MFPT Fault Data Sets," 2024. [Online]. Available: https://mfpt.org/fault-data-sets/
 
@@ -272,7 +266,7 @@ AI assistance was employed for literature search and summarization, generation o
 
 [20] A. Prosz, O. Pipek, J. Borcsok, G. Palla, Z. Szallasi, et al., "Biologically informed deep learning for explainable epigenetic clocks," *Sci. Rep.*, vol. 14, p. 1306, 2024.
 
-[21] R. K. Rosa, D. Braga, and D. Silva, "Benchmarking deep learning models for bearing fault diagnosis using the CWRU dataset: A multi-label approach," arXiv:2407.14625, 2024.
+[21] R. K. Rosa, D. Braga, and D. Silva, "Benchmarking deep learning models for bearing fault diagnosis using the CWRU dataset: A multi-label approach," arXiv preprint arXiv:2407.14625, 2024.
 
 [22] Case Western Reserve University Bearing Data Center, "Bearing vibration data," 2024. [Online]. Available: https://engineering.case.edu/bearingdatacenter
 
