@@ -160,6 +160,8 @@ Grad-CAM computed at different convolutional layers reveals that PCS does not sy
 
 On CWRU, the shallowest layer (conv1) yields a PCS of 3.47%, slightly higher than the deepest layer (conv3: 2.80%). This is opposite to the hypothesis that deeper layers, having larger receptive fields and more abstract feature representations, would exhibit stronger frequency selectivity. On MFPT, all layers produce PCS below 1.5% with large standard deviations, consistent with the finding that MFPT-based models show even weaker physical consistency than CWRU-based models. The Grad-CAM++ variant [23] at conv3 yields PCS of 3.39%, comparable to the shallow conv1 result, suggesting that the weighting scheme may modestly improve frequency-band saliency capture.
 
+\newpage
+
 ![Layer-wise PCS comparison on CWRU](figures/cwru_layer_pcs.png){width=85%}
 
 ![Layer-wise PCS comparison on MFPT](figures/mfpt_layer_pcs.png){width=85%}
@@ -178,7 +180,7 @@ Representative STFT magnitude spectrograms for each of the three bearing conditi
 
 The Physical Consistency × Accuracy matrix maps each dataset-model pair into a two-dimensional interpretability-performance space. Figure 10 shows both CWRU and MFPT occupying the "Speculative" quadrant: near-ceiling accuracy paired with PCS values below 2%.
 
-![Physical consistency × accuracy matrix — CWRU and MFPT combined](figures/fig_pcs_acc_combined.png){width=95%}
+![Physical consistency × accuracy matrix — CWRU and MFPT combined](figures/combined_pcs_acc_matrix.png){width=85%}
 
 Per the deployment decision matrix framework discussed in the interpretable fault diagnosis literature [4], models in the speculative quadrant achieve correct answers through features whose relationship to bearing physics has not been verified. Such models warrant caution in deployment contexts where physical interpretability is required for safety-critical or maintenance decisions.
 
