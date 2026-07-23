@@ -1,5 +1,7 @@
 # Grad-CAM Physical Consistency Score (PCS) for Bearing Fault Diagnosis
 
+**Repository**: https://github.com/L1cccy/cwru-gradcam-pcs
+
 ## Research Question
 
 In correctly classified CWRU and MFPT bearing fault samples, what proportion of Grad-CAM saliency concentrates within theoretical fault characteristic frequency bands? Does this physical consistency remain stable across random seeds, operating conditions, noise levels, and datasets?
